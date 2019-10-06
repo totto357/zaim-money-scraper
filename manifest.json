@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Zaim Money Scraper",
+  "version": "1.0",
+  "permissions": [
+    "tabs",
+    "background",
+    "https://zaim.net/money*"
+  ],
+  "browser_action": {
+    "default_title": "ZaimのmoneyをスクレイピングしてCSVの形式に変換します。\n結果はクリップボードに保存します。"
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://zaim.net/money*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
+}
