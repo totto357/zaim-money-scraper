@@ -76,4 +76,23 @@ chrome.runtime.onMessage.addListener(function () {
   // ログ出力
   console.log(str)
 
+  // 画面上に通知
+  const notification = document.createElement("div")
+  notification.textContent = "クリップボードにCSVをコピーしました。"
+  notification.style = `
+    position: fixed;
+    left: 0;
+    border: 0;
+    bottom: 0;
+    padding: 16px;
+    margin: 40px;
+    background: #333;
+    color: #fff;
+    border-radius: 8px;
+  }`
+  document.body.appendChild(notification)
+  setTimeout((el) => {
+    document.body.removeChild(el)
+  }, 3000, notification)
+
 })
