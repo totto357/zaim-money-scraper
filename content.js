@@ -1,9 +1,13 @@
 chrome.runtime.onMessage.addListener(function () {
 
-  const moneyList = document.querySelector("tbody.money-list")
-  const yyyyMM = document.URL.match(/month=(\d+)$/)[1]
+  // URLのmonthパラメータにyyyyMMがあるときは使い、ないときは今月を使う
+  const yyyyMM = /month=(\d+)$/.test(document.URL)
+    ? document.URL.match(/month=(\d+)$/)[1]
+    : `${new Date().getFullYear()}${("0" + (new Date().getMonth() + 1)).slice(-2)}`
 
-  const moneys = Array(...moneyList.rows).map(money => {
+  // スクレイピング
+  const moneys = Array(...document.querySelector("tbody.money-list").rows).map(money => {
+
     // id
     const url = money.querySelector("td.pencil a").getAttribute("data-url")
     const id = url.match(/\/money\/(\d+)\/edit/)[1]
@@ -35,6 +39,7 @@ chrome.runtime.onMessage.addListener(function () {
 
     // お店
     const placeEl = money.querySelector("td.place span")
+    // ツールチップ表示後は`title`から`data-original-title`に移動するという謎仕様
     const place = placeEl.getAttribute("data-original-title") || placeEl.getAttribute("title")
 
     // 品名
@@ -58,27 +63,27 @@ chrome.runtime.onMessage.addListener(function () {
       name,
       comment
     ].join(",")
+
   })
 
   // ヘッダを先頭に追加
-  moneys.unshift(["ID", "集計", "日付", "カテゴリ", "カテゴリ内訳", "金額", "出金", "入金", "お店", "品名", "メモ"])
+  moneys.unshift(["ID", "集計", "日付", "カテゴリ", "カテゴリ内訳", "金額", "出金", "入金", "お店", "品名", "メモ"].join(","))
 
-  const str = moneys.join("\n")
+  // 出力するcsv文字列
+  const csv = moneys.join("\n")
+  console.log(csv)
 
   //選択中文字列をクリップボードに入れる
   const textArea = document.createElement("textarea")
   document.body.appendChild(textArea)
-  textArea.value = str
+  textArea.value = csv
   textArea.select()
   document.execCommand("copy")
   document.body.removeChild(textArea)
 
-  // ログ出力
-  console.log(str)
-
-  // 画面上に通知
+  // 画面左下に通知を表示
   const notification = document.createElement("div")
-  notification.textContent = "クリップボードにCSVをコピーしました。"
+  notification.textContent = `${yyyyMM}のCSVをクリップボードにコピーしました。`
   notification.style = `
     position: fixed;
     left: 0;
@@ -91,6 +96,8 @@ chrome.runtime.onMessage.addListener(function () {
     border-radius: 8px;
   }`
   document.body.appendChild(notification)
+
+  // 通知を3秒後に消す
   setTimeout((el) => {
     document.body.removeChild(el)
   }, 3000, notification)
