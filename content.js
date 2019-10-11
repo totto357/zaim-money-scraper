@@ -1,9 +1,12 @@
 chrome.runtime.onMessage.addListener(function () {
 
+  // 区切り文字
+  const separator = "\t"
+
   // URLのmonthパラメータにyyyyMMがあるときは使い、ないときは今月を使う
   const yyyyMM = /month=(\d+)$/.test(document.URL)
     ? document.URL.match(/month=(\d+)$/)[1]
-    : `${new Date().getFullYear()}${("0" + (new Date().getMonth() + 1)).slice(-2)}`
+    : ((d) => `${d.getFullYear()}${("0" + (d.getMonth() + 1)).slice(-2)}`)(new Date())
 
   // スクレイピング
   const moneys = Array(...document.querySelector("tbody.money-list").rows).map(money => {
@@ -62,15 +65,15 @@ chrome.runtime.onMessage.addListener(function () {
       place,
       name,
       comment
-    ].join(",")
+    ]
 
   })
 
   // ヘッダを先頭に追加
-  moneys.unshift(["ID", "集計", "日付", "カテゴリ", "カテゴリ内訳", "金額", "出金", "入金", "お店", "品名", "メモ"].join(","))
+  moneys.unshift(["ID", "集計", "日付", "カテゴリ", "カテゴリ内訳", "金額", "出金", "入金", "お店", "品名", "メモ"])
 
   // 出力するcsv文字列
-  const csv = moneys.join("\n")
+  const csv = moneys.map(m => m.join(separator)).join("\n")
   console.log(csv)
 
   //選択中文字列をクリップボードに入れる
@@ -83,7 +86,7 @@ chrome.runtime.onMessage.addListener(function () {
 
   // 画面左下に通知を表示
   const notification = document.createElement("div")
-  notification.textContent = `${yyyyMM}のCSVをクリップボードにコピーしました。`
+  notification.textContent = `${yyyyMM}の詳細をクリップボードにコピーしました。`
   notification.style = `
     position: fixed;
     left: 0;
